@@ -1,7 +1,8 @@
 use crate::{
     models::{
-        CodeMethod, CodeRequestParams, CodeVerifyParams, MediaResponse, Message, MessageResponse,
-        MessageStatus, MessageStatusResponse, PhoneNumberResponse,
+        BusinessProfileData, BusinessProfileResponse, CodeMethod, CodeRequestParams,
+        CodeVerifyParams, CreateProductCatalogRequest, ItemProduct, MediaResponse, Message,
+        MessageResponse, MessageStatus, MessageStatusResponse, PhoneNumberResponse,
     },
     WhatsappError,
 };
@@ -12,6 +13,7 @@ pub struct WhatsappClient {
     version: String,
     access_token: String,
     phone_number_id: String,
+    business_id: String,
 }
 
 impl WhatsappClient {
@@ -20,6 +22,15 @@ impl WhatsappClient {
             version: "v20.0".into(),
             access_token: access_token.into(),
             phone_number_id: phone_number_id.into(),
+            business_id: "".to_string(),
+        }
+    }
+    pub fn new_with_business(access_token: &str, phone_number_id: &str, business_id: &str) -> Self {
+        Self {
+            version: "v20.0".into(),
+            access_token: access_token.into(),
+            phone_number_id: phone_number_id.into(),
+            business_id: business_id.into(),
         }
     }
 
@@ -77,6 +88,43 @@ impl WhatsappClient {
         http_client::get(&self.media_api_url(media_id), &self.access_token).await
     }
 
+    pub async fn get_business_profile(&self) -> Result<BusinessProfileResponse, WhatsappError> {
+        let ans = http_client::get(&self.business_profile_url(), &self.access_token).await?;
+        Ok(ans)
+    }
+
+    pub async fn update_business_profile(
+        &self,
+        business_profile_data: BusinessProfileData,
+    ) -> Result<BusinessProfileResponse, WhatsappError> {
+        http_client::post(
+            &self.business_profile_url(),
+            &self.access_token,
+            &business_profile_data,
+        )
+        .await
+    }
+
+    pub async fn create_product_catalog(
+        &self,
+        data: CreateProductCatalogRequest,
+    ) -> Result<serde_json::Value, WhatsappError> {
+        http_client::post_form(&self.owned_product_catalog_url(), &self.access_token, &data).await
+    }
+
+    pub async fn create_item_product_catalog(
+        &self,
+        catalog_id: String,
+        data: ItemProduct,
+    ) -> Result<serde_json::Value, WhatsappError> {
+        http_client::post_form(
+            &self.item_product_catalog_url(catalog_id),
+            &self.access_token,
+            &data,
+        )
+        .await
+    }
+
     fn facebook_api_version_url(&self) -> String {
         format!("{FACEBOOK_GRAPH_API_BASE_URL}/{}", self.version)
     }
@@ -107,6 +155,32 @@ impl WhatsappClient {
             self.facebook_api_version_url(),
             self.phone_number_id
         )
+    }
+
+    fn business_profile_url(&self) -> String {
+        let url = format!(
+            "{}/{}/whatsapp_business_profile?fields=about,address,description,email,profile_picture_url,websites,vertical",
+            self.facebook_api_version_url(),
+            self.business_id,
+        );
+        url
+    }
+
+    fn item_product_catalog_url(&self, catalog_id: String) -> String {
+        format!(
+            "{}/{}/products",
+            self.facebook_api_version_url(),
+            catalog_id
+        )
+    }
+
+    fn owned_product_catalog_url(&self) -> String {
+        let url = format!(
+            "{}/{}/owned_product_catalogs",
+            self.facebook_api_version_url(),
+            self.business_id,
+        );
+        url
     }
 }
 
@@ -147,6 +221,36 @@ mod http_client {
             .post(url)
             .bearer_auth(bearer_token)
             .json(&data)
+            .send()
+            .await?;
+
+        match resp.status() {
+            StatusCode::OK | StatusCode::CREATED => {
+                let json = resp.json::<U>().await?;
+                Ok(json)
+            }
+            _ => {
+                log::warn!("{:?}", &resp);
+                let error_text = &resp.text().await?;
+                log::warn!("{:?}", &error_text);
+                Err(WhatsappError::UnexpectedError(error_text.to_string()))
+            }
+        }
+    }
+    pub async fn post_form<T, U>(
+        url: &str,
+        bearer_token: &str,
+        data: &T,
+    ) -> Result<U, WhatsappError>
+    where
+        T: Serialize + ?Sized,
+        U: DeserializeOwned,
+    {
+        let client = reqwest::Client::new();
+        let resp = client
+            .post(url)
+            .bearer_auth(bearer_token)
+            .form(&data)
             .send()
             .await?;
 
