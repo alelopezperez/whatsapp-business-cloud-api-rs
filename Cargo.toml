@@ -1,9 +1,9 @@
 [package]
-name = "whatsapp-cloud-api"
+name = "whatsapp-business-cloud-api"
 version = "0.5.3"
 edition = "2021"
 license = "MIT OR Apache-2.0"
-description = "Whatsapp Cloud API Rust Client"
+description = "Whatsapp and Business Cloud API Rust Client"
 homepage = "https://github.com/alelopezperez/whatsapp-business-cloud-api-rs"
 repository = "https://github.com/alelopezperez/whatsapp-business-cloud-api-rs"
 readme = "README.md"
