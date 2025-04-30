@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct BusinessProfileResponse {
-    data: Vec<BusinessProfileData>,
+    pub data: Vec<BusinessProfileData>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

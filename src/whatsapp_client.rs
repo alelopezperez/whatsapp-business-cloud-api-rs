@@ -3,6 +3,7 @@ use crate::{
         BusinessProfileData, BusinessProfileResponse, CodeMethod, CodeRequestParams,
         CodeVerifyParams, CreateProductCatalogRequest, ItemProduct, MediaResponse, Message,
         MessageResponse, MessageStatus, MessageStatusResponse, PhoneNumberResponse,
+        UpdateBusinessProfileResponse,
     },
     WhatsappError,
 };
@@ -14,6 +15,7 @@ pub struct WhatsappClient {
     access_token: String,
     phone_number_id: String,
     business_id: String,
+    whatsapp_business_id: String,
 }
 
 impl WhatsappClient {
@@ -23,6 +25,7 @@ impl WhatsappClient {
             access_token: access_token.into(),
             phone_number_id: phone_number_id.into(),
             business_id: "".to_string(),
+            whatsapp_business_id: "".to_string(),
         }
     }
     pub fn new_with_business(access_token: &str, phone_number_id: &str, business_id: &str) -> Self {
@@ -31,6 +34,22 @@ impl WhatsappClient {
             access_token: access_token.into(),
             phone_number_id: phone_number_id.into(),
             business_id: business_id.into(),
+            whatsapp_business_id: "".to_string(),
+        }
+    }
+
+    pub fn new_with_whatsapp_business(
+        access_token: &str,
+        phone_number_id: &str,
+        business_id: &str,
+        whatsapp_business_id: &str,
+    ) -> Self {
+        Self {
+            version: "v20.0".into(),
+            access_token: access_token.into(),
+            phone_number_id: phone_number_id.into(),
+            business_id: business_id.into(),
+            whatsapp_business_id: whatsapp_business_id.to_string(),
         }
     }
 
@@ -89,16 +108,16 @@ impl WhatsappClient {
     }
 
     pub async fn get_business_profile(&self) -> Result<BusinessProfileResponse, WhatsappError> {
-        let ans = http_client::get(&self.business_profile_url(), &self.access_token).await?;
+        let ans = http_client::get(&self.read_business_profile_url(), &self.access_token).await?;
         Ok(ans)
     }
 
     pub async fn update_business_profile(
         &self,
         business_profile_data: BusinessProfileData,
-    ) -> Result<BusinessProfileResponse, WhatsappError> {
+    ) -> Result<UpdateBusinessProfileResponse, WhatsappError> {
         http_client::post(
-            &self.business_profile_url(),
+            &self.update_business_profile_url(),
             &self.access_token,
             &business_profile_data,
         )
@@ -157,11 +176,19 @@ impl WhatsappClient {
         )
     }
 
-    fn business_profile_url(&self) -> String {
+    fn read_business_profile_url(&self) -> String {
         let url = format!(
             "{}/{}/whatsapp_business_profile?fields=about,address,description,email,profile_picture_url,websites,vertical",
             self.facebook_api_version_url(),
-            self.business_id,
+            self.phone_number_id,
+        );
+        url
+    }
+    fn update_business_profile_url(&self) -> String {
+        let url = format!(
+            "{}/{}/whatsapp_business_profile",
+            self.facebook_api_version_url(),
+            self.phone_number_id,
         );
         url
     }
