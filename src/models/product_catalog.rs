@@ -13,3 +13,8 @@ pub struct ItemProduct {
     pub currency: String,
     pub image_url: String,
 }
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ProductCatalog {
+    pub id: String,
+}

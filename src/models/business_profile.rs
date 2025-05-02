@@ -21,3 +21,8 @@ pub struct BusinessProfileData {
 pub struct UpdateBusinessProfileResponse {
     pub success: bool,
 }
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ConnectCatalogToWhatsappBusiness {
+    pub catalog_id: String,
+}

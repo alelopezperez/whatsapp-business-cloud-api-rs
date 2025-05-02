@@ -1,4 +1,4 @@
-use whatsapp_cloud_api::{
+use whatsapp_business_cloud_api::{
     models::{
         Component, ComponentType, Image, Interactive, InteractiveActionButton,
         InteractiveActionSection, InteractiveActionSectionRow, Message, Parameter, Template, Text,

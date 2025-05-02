@@ -1,4 +1,4 @@
-use whatsapp_cloud_api::{models::CodeMethod, WhatsappClient, WhatsappError};
+use whatsapp_business_cloud_api::{models::CodeMethod, WhatsappClient, WhatsappError};
 
 #[tokio::test]
 async fn request_code_works() -> Result<(), WhatsappError> {

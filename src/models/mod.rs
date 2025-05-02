@@ -13,7 +13,8 @@ mod text_message;
 pub mod webhooks;
 
 pub use business_profile::{
-    BusinessProfileData, BusinessProfileResponse, UpdateBusinessProfileResponse,
+    BusinessProfileData, BusinessProfileResponse, ConnectCatalogToWhatsappBusiness,
+    UpdateBusinessProfileResponse,
 };
 
 pub use component::{
@@ -30,6 +31,6 @@ pub use message_response::{
 };
 pub use phone_number::{CodeMethod, PhoneNumberResponse};
 pub(crate) use phone_number::{CodeRequestParams, CodeVerifyParams};
-pub use product_catalog::{CreateProductCatalogRequest, ItemProduct};
+pub use product_catalog::{CreateProductCatalogRequest, ItemProduct, ProductCatalog};
 pub use template_message::{Language, Template};
 pub use text_message::Text;

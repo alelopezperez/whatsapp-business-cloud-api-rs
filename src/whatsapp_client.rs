@@ -1,9 +1,9 @@
 use crate::{
     models::{
         BusinessProfileData, BusinessProfileResponse, CodeMethod, CodeRequestParams,
-        CodeVerifyParams, CreateProductCatalogRequest, ItemProduct, MediaResponse, Message,
-        MessageResponse, MessageStatus, MessageStatusResponse, PhoneNumberResponse,
-        UpdateBusinessProfileResponse,
+        CodeVerifyParams, ConnectCatalogToWhatsappBusiness, CreateProductCatalogRequest,
+        ItemProduct, MediaResponse, Message, MessageResponse, MessageStatus, MessageStatusResponse,
+        PhoneNumberResponse, ProductCatalog, UpdateBusinessProfileResponse,
     },
     WhatsappError,
 };
@@ -127,7 +127,7 @@ impl WhatsappClient {
     pub async fn create_product_catalog(
         &self,
         data: CreateProductCatalogRequest,
-    ) -> Result<serde_json::Value, WhatsappError> {
+    ) -> Result<ProductCatalog, WhatsappError> {
         http_client::post_form(&self.owned_product_catalog_url(), &self.access_token, &data).await
     }
 
@@ -142,6 +142,23 @@ impl WhatsappClient {
             &data,
         )
         .await
+    }
+
+    pub async fn connect_catalog_to_whatsapp_business(
+        &self,
+        catalog_id: String,
+    ) -> Result<UpdateBusinessProfileResponse, WhatsappError> {
+        let data = ConnectCatalogToWhatsappBusiness { catalog_id };
+        http_client::post(&self.product_catalogs_url(), &self.access_token, &data).await
+    }
+
+    fn product_catalogs_url(&self) -> String {
+        // {whatsapp_business_id}/product_catalogs'
+        format!(
+            "{}/{}/product_catalogs",
+            self.facebook_api_version_url(),
+            self.whatsapp_business_id,
+        )
     }
 
     fn facebook_api_version_url(&self) -> String {
