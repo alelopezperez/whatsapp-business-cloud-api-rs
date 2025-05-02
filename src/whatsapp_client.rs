@@ -135,11 +135,22 @@ impl WhatsappClient {
         &self,
         catalog_id: String,
         data: ItemProduct,
-    ) -> Result<serde_json::Value, WhatsappError> {
+    ) -> Result<ProductCatalog, WhatsappError> {
         http_client::post_form(
             &self.item_product_catalog_url(catalog_id),
             &self.access_token,
             &data,
+        )
+        .await
+    }
+
+    pub async fn delete_item_product_catalog(
+        &self,
+        product_id: String,
+    ) -> Result<ProductCatalog, WhatsappError> {
+        http_client::delete(
+            &self.delete_item_catalog_url(product_id),
+            &self.access_token,
         )
         .await
     }
@@ -159,6 +170,11 @@ impl WhatsappClient {
             self.facebook_api_version_url(),
             self.whatsapp_business_id,
         )
+    }
+
+    fn delete_item_catalog_url(&self, product_item_id: String) -> String {
+        // {whatsapp_business_id}/product_catalogs'
+        format!("{}/{}", self.facebook_api_version_url(), product_item_id)
     }
 
     fn facebook_api_version_url(&self) -> String {
@@ -267,6 +283,26 @@ mod http_client {
             .json(&data)
             .send()
             .await?;
+
+        match resp.status() {
+            StatusCode::OK | StatusCode::CREATED => {
+                let json = resp.json::<U>().await?;
+                Ok(json)
+            }
+            _ => {
+                log::warn!("{:?}", &resp);
+                let error_text = &resp.text().await?;
+                log::warn!("{:?}", &error_text);
+                Err(WhatsappError::UnexpectedError(error_text.to_string()))
+            }
+        }
+    }
+    pub async fn delete<U>(url: &str, bearer_token: &str) -> Result<U, WhatsappError>
+    where
+        U: DeserializeOwned,
+    {
+        let client = reqwest::Client::new();
+        let resp = client.delete(url).bearer_auth(bearer_token).send().await?;
 
         match resp.status() {
             StatusCode::OK | StatusCode::CREATED => {
