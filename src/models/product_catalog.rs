@@ -18,3 +18,14 @@ pub struct ItemProduct {
 pub struct ProductCatalog {
     pub id: String,
 }
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Success {
+    pub success: bool,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct EditItemProduct {
+    pub name: Option<String>,
+    pub price: Option<i32>,
+    pub image_url: Option<String>,
+}

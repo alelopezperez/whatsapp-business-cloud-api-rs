@@ -2,8 +2,9 @@ use crate::{
     models::{
         BusinessProfileData, BusinessProfileResponse, CodeMethod, CodeRequestParams,
         CodeVerifyParams, ConnectCatalogToWhatsappBusiness, CreateProductCatalogRequest,
-        ItemProduct, MediaResponse, Message, MessageResponse, MessageStatus, MessageStatusResponse,
-        PhoneNumberResponse, ProductCatalog, UpdateBusinessProfileResponse,
+        EditItemProduct, ItemProduct, MediaResponse, Message, MessageResponse, MessageStatus,
+        MessageStatusResponse, PhoneNumberResponse, ProductCatalog, Success,
+        UpdateBusinessProfileResponse,
     },
     WhatsappError,
 };
@@ -147,10 +148,23 @@ impl WhatsappClient {
     pub async fn delete_item_product_catalog(
         &self,
         product_id: String,
-    ) -> Result<ProductCatalog, WhatsappError> {
+    ) -> Result<Success, WhatsappError> {
         http_client::delete(
             &self.delete_item_catalog_url(product_id),
             &self.access_token,
+        )
+        .await
+    }
+
+    pub async fn edit_item_product_catalog(
+        &self,
+        product_id: String,
+        edit_item_product: EditItemProduct,
+    ) -> Result<Success, WhatsappError> {
+        http_client::post(
+            &self.delete_item_catalog_url(product_id),
+            &self.access_token,
+            &edit_item_product,
         )
         .await
     }
@@ -174,6 +188,7 @@ impl WhatsappClient {
 
     fn delete_item_catalog_url(&self, product_item_id: String) -> String {
         // {whatsapp_business_id}/product_catalogs'
+        // curl -X DELETE  'https://graph.facebook.com/v22.0/9725215490925023'
         format!("{}/{}", self.facebook_api_version_url(), product_item_id)
     }
 
