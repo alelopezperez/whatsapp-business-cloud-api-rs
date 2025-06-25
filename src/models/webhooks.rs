@@ -171,14 +171,15 @@ pub struct ListReply {
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Order {
     pub catalog_id: String,
+    pub text: String,
     pub product_items: Vec<ProductItem>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct ProductItem {
     pub product_retailer_id: String,
-    pub quantity: String,
-    pub item_price: String,
+    pub quantity: usize,
+    pub item_price: f64,
     pub currency: String,
 }
 

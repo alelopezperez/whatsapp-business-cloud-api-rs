@@ -11,10 +11,14 @@ pub struct BusinessProfileData {
     pub address: Option<String>,
     pub description: Option<String>,
     pub email: Option<String>,
+    #[serde(default = "default_messaging_product")]
     pub messaging_product: String,
-    pub profile_picture_handle: Option<String>,
+    pub profile_picture_url: Option<String>,
     pub vertical: Option<String>,
     pub websites: Option<Vec<String>>,
+}
+fn default_messaging_product() -> String {
+    "whatsapp".to_string()
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

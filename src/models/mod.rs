@@ -9,6 +9,7 @@ mod phone_number;
 mod product_catalog;
 mod template_message;
 mod text_message;
+mod upload;
 
 pub mod webhooks;
 
@@ -36,3 +37,4 @@ pub use product_catalog::{
 };
 pub use template_message::{Language, Template};
 pub use text_message::Text;
+pub use upload::{UploadParams, UploadSuccess};

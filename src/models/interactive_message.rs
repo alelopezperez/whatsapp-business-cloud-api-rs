@@ -29,6 +29,13 @@ impl Interactive {
             body: Some(InteractiveBody::new(body_text)),
         }
     }
+    pub fn for_catalog_messages(body_text: &str) -> Self {
+        Self {
+            interactive_type: InteractiveType::CatalogMessage,
+            body: Some(InteractiveBody::new(body_text)),
+            action: InteractiveAction::new_catalog_message(),
+        }
+    }
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -38,6 +45,8 @@ pub struct InteractiveAction {
     catalog_id: Option<String>,
     product_retailer_id: Option<String>,
     sections: Option<Vec<InteractiveActionSection>>,
+    name: Option<String>,
+    parameters: Option<InteractiveActionParameters>,
     // TODO: Other fields
 }
 
@@ -49,6 +58,8 @@ impl InteractiveAction {
             catalog_id: None,
             product_retailer_id: None,
             sections: None,
+            name: None,
+            parameters: None,
         }
     }
 
@@ -59,6 +70,20 @@ impl InteractiveAction {
             catalog_id: None,
             product_retailer_id: None,
             sections: Some(sections),
+            name: None,
+            parameters: None,
+        }
+    }
+
+    pub fn new_catalog_message() -> Self {
+        InteractiveAction {
+            name: Some("catalog_message".into()),
+            parameters: None,
+            button: None,
+            buttons: None,
+            catalog_id: None,
+            product_retailer_id: None,
+            sections: None,
         }
     }
 }
@@ -117,6 +142,10 @@ pub enum InteractiveType {
     Flow,
 }
 
+#[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct InteractiveActionParameters {
+    thumbnail_product_retailer_id: Option<String>,
+}
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct InteractiveActionSection {
     // TODO: product_items

@@ -125,6 +125,8 @@ impl WhatsappClient {
         .await
     }
 
+    pub async fn start_upload_img() {}
+
     pub async fn create_product_catalog(
         &self,
         data: CreateProductCatalogRequest,
@@ -257,6 +259,26 @@ impl WhatsappClient {
         );
         url
     }
+
+    async fn send<T>(req: reqwest::RequestBuilder) -> Result<T, WhatsappError>
+    where
+        T: serde::de::DeserializeOwned,
+    {
+        let response = req.send().await?;
+
+        match response.status() {
+            reqwest::StatusCode::OK => {
+                let json = response.json::<T>().await?;
+                Ok(json)
+            }
+            _ => {
+                log::warn!("{:?}", &response);
+                let error_text = &response.text().await?;
+                log::warn!("{:?}", &error_text);
+                Err(WhatsappError::UnexpectedError(error_text.to_string()))
+            }
+        }
+    }
 }
 
 mod http_client {
@@ -346,6 +368,37 @@ mod http_client {
             .post(url)
             .bearer_auth(bearer_token)
             .form(&data)
+            .send()
+            .await?;
+
+        match resp.status() {
+            StatusCode::OK | StatusCode::CREATED => {
+                let json = resp.json::<U>().await?;
+                Ok(json)
+            }
+            _ => {
+                log::warn!("{:?}", &resp);
+                let error_text = &resp.text().await?;
+                log::warn!("{:?}", &error_text);
+                Err(WhatsappError::UnexpectedError(error_text.to_string()))
+            }
+        }
+    }
+
+    pub async fn post_only_headers<T, U>(
+        url: &str,
+        bearer_token: &str,
+        data: &T,
+    ) -> Result<U, WhatsappError>
+    where
+        T: Serialize + ?Sized,
+        U: DeserializeOwned,
+    {
+        let client = reqwest::Client::new();
+        let resp = client
+            .post(url)
+            .bearer_auth(bearer_token)
+            .query(data)
             .send()
             .await?;
 
