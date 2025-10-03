@@ -16,10 +16,10 @@ use crate::{
 
 const FACEBOOK_GRAPH_API_BASE_URL: &str = "https://graph.facebook.com";
 
+#[derive(Clone, Debug)]
 pub struct WhatsappClient {
     version: String,
     access_token: String,
-    //whatsapp_business_id: String,
     client: reqwest::Client,
 }
 
