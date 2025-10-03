@@ -94,6 +94,7 @@ pub enum ParameterType {
     Image,
     Text,
     Video,
+    Payload,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
